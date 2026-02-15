@@ -72,7 +72,7 @@ fun HistoryScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(completedOrders) { order ->
-                    HistoryOrderCard(shape = MaterialTheme.shapes.small, order = order)
+                    HistoryOrderCard(order = order)
                 }
             }
         }
