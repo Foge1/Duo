@@ -80,12 +80,13 @@ fun HistoryScreen(
 }
 
 @Composable
-fun HistoryOrderCard(shape = MaterialTheme.shapes.small, order: Order) {
+fun HistoryOrderCard(order: Order) {
     val dateFormat = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
     
-    Card(shape = MaterialTheme.shapes.small, 
+    Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = MaterialTheme.shapes.small
     ) {
         Column(
             modifier = Modifier
