@@ -24,6 +24,7 @@ fun CreateOrderDialog(
     var address by remember { mutableStateOf("") }
     var cargo by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
+    var minRating by remember { mutableStateOf("4.0") }
     var showError by remember { mutableStateOf(false) }
     
     // Дата и время
@@ -41,6 +42,7 @@ fun CreateOrderDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Новый заказ") },
+        containerColor = MaterialTheme.colorScheme.surface,
         text = {
             Column(
                 modifier = Modifier
@@ -89,6 +91,17 @@ fun CreateOrderDialog(
                     label = { Text("Описание груза") },
                     modifier = Modifier.fillMaxWidth(),
                     maxLines = 3
+                )
+                
+                // Минимальный рейтинг
+                OutlinedTextField(
+                    value = minRating,
+                    onValueChange = { minRating = it },
+                    label = { Text("Минимальный рейтинг грузчика") },
+                    placeholder = { Text("Например: 4.5") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                 )
                 
                 OutlinedTextField(

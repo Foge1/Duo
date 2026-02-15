@@ -77,7 +77,7 @@ fun RoleSelectionScreen(
                     onClick = { selectedRole = UserRole.DISPATCHER },
                     modifier = Modifier
                         .weight(1f)
-                        .height(100.dp),
+                        .height(80.dp),
                     shape = MaterialTheme.shapes.small,
                     colors = ButtonDefaults.outlinedButtonColors(
                         containerColor = if (selectedRole == UserRole.DISPATCHER) 
@@ -98,9 +98,9 @@ fun RoleSelectionScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        Text("📋", fontSize = 32.sp)
+                        Text("🎯", fontSize = 28.sp)
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text("Диспетчер", fontSize = 14.sp)
+                        Text("Диспетчер", fontSize = 13.sp)
                     }
                 }
                 
@@ -108,7 +108,7 @@ fun RoleSelectionScreen(
                     onClick = { selectedRole = UserRole.LOADER },
                     modifier = Modifier
                         .weight(1f)
-                        .height(100.dp),
+                        .height(80.dp),
                     shape = MaterialTheme.shapes.small,
                     colors = ButtonDefaults.outlinedButtonColors(
                         containerColor = if (selectedRole == UserRole.LOADER) 
@@ -129,9 +129,9 @@ fun RoleSelectionScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        Text("💪", fontSize = 32.sp)
+                        Text("📦", fontSize = 28.sp)
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text("Грузчик", fontSize = 14.sp)
+                        Text("Грузчик", fontSize = 13.sp)
                     }
                 }
             }

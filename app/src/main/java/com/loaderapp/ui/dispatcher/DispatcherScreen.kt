@@ -80,6 +80,12 @@ fun DispatcherScreen(
                         currentDestination = DispatcherDestination.ORDERS
                         scope.launch { drawerState.close() }
                     },
+                    shape = MaterialTheme.shapes.small,
+                    colors = NavigationDrawerItemDefaults.colors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary
+                    ),
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
                 
@@ -91,6 +97,12 @@ fun DispatcherScreen(
                         currentDestination = DispatcherDestination.RATING
                         scope.launch { drawerState.close() }
                     },
+                    shape = MaterialTheme.shapes.small,
+                    colors = NavigationDrawerItemDefaults.colors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary
+                    ),
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
                 
