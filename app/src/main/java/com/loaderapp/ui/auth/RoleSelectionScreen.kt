@@ -71,45 +71,67 @@ fun RoleSelectionScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 OutlinedButton(
                     onClick = { selectedRole = UserRole.DISPATCHER },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(100.dp),
+                    shape = MaterialTheme.shapes.small,
                     colors = ButtonDefaults.outlinedButtonColors(
                         containerColor = if (selectedRole == UserRole.DISPATCHER) 
                             MaterialTheme.colorScheme.primaryContainer 
                         else 
-                            MaterialTheme.colorScheme.surface
+                            MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.primary
+                    ),
+                    border = androidx.compose.foundation.BorderStroke(
+                        2.dp,
+                        if (selectedRole == UserRole.DISPATCHER) 
+                            MaterialTheme.colorScheme.primary 
+                        else 
+                            MaterialTheme.colorScheme.outline
                     )
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(vertical = 8.dp)
+                        verticalArrangement = Arrangement.Center
                     ) {
                         Text("📋", fontSize = 32.sp)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text("Диспетчер")
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text("Диспетчер", fontSize = 14.sp)
                     }
                 }
                 
                 OutlinedButton(
                     onClick = { selectedRole = UserRole.LOADER },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(100.dp),
+                    shape = MaterialTheme.shapes.small,
                     colors = ButtonDefaults.outlinedButtonColors(
                         containerColor = if (selectedRole == UserRole.LOADER) 
                             MaterialTheme.colorScheme.primaryContainer 
                         else 
-                            MaterialTheme.colorScheme.surface
+                            MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.primary
+                    ),
+                    border = androidx.compose.foundation.BorderStroke(
+                        2.dp,
+                        if (selectedRole == UserRole.LOADER) 
+                            MaterialTheme.colorScheme.primary 
+                        else 
+                            MaterialTheme.colorScheme.outline
                     )
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(vertical = 8.dp)
+                        verticalArrangement = Arrangement.Center
                     ) {
                         Text("💪", fontSize = 32.sp)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text("Грузчик")
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text("Грузчик", fontSize = 14.sp)
                     }
                 }
             }
@@ -137,7 +159,8 @@ fun RoleSelectionScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
+                    .height(56.dp),
+                shape = MaterialTheme.shapes.small
             ) {
                 Text("Продолжить", fontSize = 16.sp)
             }

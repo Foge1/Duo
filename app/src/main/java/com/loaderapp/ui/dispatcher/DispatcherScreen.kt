@@ -304,7 +304,8 @@ fun OrderCard(
     
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = MaterialTheme.shapes.small
     ) {
         Column(
             modifier = Modifier
@@ -349,13 +350,18 @@ fun OrderCard(
             )
             
             if (order.status == OrderStatus.AVAILABLE) {
-                Button(
+                OutlinedButton(
                     onClick = { onCancel(order) },
                     modifier = Modifier
                         .align(Alignment.End)
                         .padding(top = 8.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.error
+                    ),
+                    border = androidx.compose.foundation.BorderStroke(
+                        2.dp,
+                        MaterialTheme.colorScheme.error
                     )
                 ) {
                     Text("Отменить")

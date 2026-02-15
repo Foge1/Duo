@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 fun SettingsScreen(
     onBackClick: () -> Unit
 ) {
+    var darkThemeEnabled by remember { mutableStateOf(false) }
     var notificationsEnabled by remember { mutableStateOf(true) }
     var soundEnabled by remember { mutableStateOf(true) }
     var vibrationEnabled by remember { mutableStateOf(true) }
@@ -38,6 +39,33 @@ fun SettingsScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
+            // Темная тема
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Темная тема",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Text(
+                        text = "Использовать темное оформление",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Switch(
+                    checked = darkThemeEnabled,
+                    onCheckedChange = { darkThemeEnabled = it }
+                )
+            }
+            
+            Divider()
+            
             // Уведомления
             Row(
                 modifier = Modifier

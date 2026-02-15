@@ -41,7 +41,7 @@ fun RatingScreen(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Card(
+            Card(shape = MaterialTheme.shapes.small, 
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 24.dp),
