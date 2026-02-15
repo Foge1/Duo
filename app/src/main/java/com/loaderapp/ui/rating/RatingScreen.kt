@@ -22,15 +22,7 @@ fun RatingScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Рейтинг") },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Назад"
-                        )
-                    }
-                }
+                title = { Text("Рейтинг") }
             )
         }
     ) { padding ->

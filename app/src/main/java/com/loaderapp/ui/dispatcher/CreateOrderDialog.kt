@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import java.text.SimpleDateFormat
@@ -42,7 +43,7 @@ fun CreateOrderDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Новый заказ") },
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = Color.White,
         text = {
             Column(
                 modifier = Modifier

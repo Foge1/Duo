@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import com.loaderapp.data.model.Order
 import com.loaderapp.data.model.OrderStatus
 import com.loaderapp.ui.history.HistoryScreen
@@ -47,7 +49,8 @@ fun DispatcherScreen(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(
-                modifier = Modifier.width(240.dp)
+                modifier = Modifier.width(240.dp),
+                drawerContainerColor = androidx.compose.ui.graphics.Color.White
             ) {
                 Spacer(modifier = Modifier.height(16.dp))
                 
@@ -86,6 +89,12 @@ fun DispatcherScreen(
                         selectedIconColor = MaterialTheme.colorScheme.primary,
                         selectedTextColor = MaterialTheme.colorScheme.primary
                     ),
+                    shape = androidx.compose.ui.graphics.RectangleShape,
+                    colors = NavigationDrawerItemDefaults.colors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary
+                    ),
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
                 
@@ -103,6 +112,12 @@ fun DispatcherScreen(
                         selectedIconColor = MaterialTheme.colorScheme.primary,
                         selectedTextColor = MaterialTheme.colorScheme.primary
                     ),
+                    shape = androidx.compose.ui.graphics.RectangleShape,
+                    colors = NavigationDrawerItemDefaults.colors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary
+                    ),
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
                 
@@ -114,6 +129,12 @@ fun DispatcherScreen(
                         currentDestination = DispatcherDestination.HISTORY
                         scope.launch { drawerState.close() }
                     },
+                    shape = androidx.compose.ui.graphics.RectangleShape,
+                    colors = NavigationDrawerItemDefaults.colors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary
+                    ),
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
                 
@@ -125,6 +146,12 @@ fun DispatcherScreen(
                         currentDestination = DispatcherDestination.SETTINGS
                         scope.launch { drawerState.close() }
                     },
+                    shape = androidx.compose.ui.graphics.RectangleShape,
+                    colors = NavigationDrawerItemDefaults.colors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary
+                    ),
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
                 
@@ -138,6 +165,12 @@ fun DispatcherScreen(
                         showSwitchDialog = true
                         scope.launch { drawerState.close() }
                     },
+                    shape = androidx.compose.ui.graphics.RectangleShape,
+                    colors = NavigationDrawerItemDefaults.colors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary
+                    ),
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
             }
