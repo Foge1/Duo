@@ -12,7 +12,7 @@ import com.loaderapp.data.model.User
 
 @Database(
     entities = [Order::class, User::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

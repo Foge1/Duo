@@ -32,6 +32,11 @@ class LoaderViewModel(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
     
+    // Statistics flows
+    val completedCount = repository.getCompletedOrdersCount(loaderId)
+    val totalEarnings = repository.getTotalEarnings(loaderId)
+    val averageRating = repository.getAverageRating(loaderId)
+    
     init {
         loadAvailableOrders()
         loadMyOrders()
@@ -67,18 +72,13 @@ class LoaderViewModel(
         viewModelScope.launch {
             try {
                 _isLoading.value = true
-                
-                // Проверяем, что заказ еще доступен
                 val currentOrder = repository.getOrderById(order.id)
                 if (currentOrder?.status == OrderStatus.AVAILABLE) {
                     repository.takeOrder(order.id, loaderId)
-                    
-                    // Получаем имя грузчика для уведомления
                     val loader = repository.getUserById(loaderId)
                     if (loader != null) {
                         notificationHelper.sendOrderTakenNotification(order.address, loader.name)
                     }
-                    
                     _errorMessage.value = null
                 } else {
                     _errorMessage.value = "Заказ уже занят другим грузчиком"
@@ -97,6 +97,19 @@ class LoaderViewModel(
                 repository.completeOrder(order.id)
             } catch (e: Exception) {
                 _errorMessage.value = "Ошибка завершения заказа: ${e.message}"
+            }
+        }
+    }
+    
+    fun rateOrder(orderId: Long, rating: Float) {
+        viewModelScope.launch {
+            try {
+                repository.rateOrder(orderId, rating)
+                // Пересчитываем средний рейтинг пользователя
+                val avgRating = repository.getAverageRating(loaderId)
+                // Обновляем рейтинг пользователя в БД
+            } catch (e: Exception) {
+                _errorMessage.value = "Ошибка выставления оценки: ${e.message}"
             }
         }
     }

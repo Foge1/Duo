@@ -24,6 +24,19 @@ class AppRepository(
     
     suspend fun getOrderById(orderId: Long): Order? = orderDao.getOrderById(orderId)
     
+    fun searchOrders(query: String, status: OrderStatus? = null): Flow<List<Order>> =
+        orderDao.searchOrders(query, status)
+    
+    fun searchOrdersByDispatcher(dispatcherId: Long, query: String): Flow<List<Order>> =
+        orderDao.searchOrdersByDispatcher(dispatcherId, query)
+    
+    // Statistics
+    fun getCompletedOrdersCount(workerId: Long): Flow<Int> = orderDao.getCompletedOrdersCount(workerId)
+    fun getTotalEarnings(workerId: Long): Flow<Double?> = orderDao.getTotalEarnings(workerId)
+    fun getAverageRating(workerId: Long): Flow<Float?> = orderDao.getAverageRating(workerId)
+    fun getDispatcherCompletedCount(dispatcherId: Long): Flow<Int> = orderDao.getDispatcherCompletedCount(dispatcherId)
+    fun getDispatcherActiveCount(dispatcherId: Long): Flow<Int> = orderDao.getDispatcherActiveCount(dispatcherId)
+    
     suspend fun createOrder(order: Order): Long = orderDao.insertOrder(order)
     
     suspend fun updateOrder(order: Order) = orderDao.updateOrder(order)
@@ -35,11 +48,15 @@ class AppRepository(
     }
     
     suspend fun completeOrder(orderId: Long) {
-        orderDao.updateOrderStatus(orderId, OrderStatus.COMPLETED)
+        orderDao.completeOrder(orderId, OrderStatus.COMPLETED, System.currentTimeMillis())
     }
     
     suspend fun cancelOrder(orderId: Long) {
         orderDao.updateOrderStatus(orderId, OrderStatus.CANCELLED)
+    }
+    
+    suspend fun rateOrder(orderId: Long, rating: Float) {
+        orderDao.rateOrder(orderId, rating)
     }
     
     // User operations

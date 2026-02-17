@@ -38,15 +38,20 @@ enum class LoaderDestination {
 fun LoaderScreen(
     viewModel: LoaderViewModel,
     userName: String,
-    onSwitchRole: () -> Unit
+    onSwitchRole: () -> Unit,
+    onDarkThemeChanged: ((Boolean) -> Unit)? = null
 ) {
     val availableOrders by viewModel.availableOrders.collectAsState()
     val myOrders by viewModel.myOrders.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
+    val completedCount by viewModel.completedCount.collectAsState(initial = 0)
+    val totalEarnings by viewModel.totalEarnings.collectAsState(initial = null)
+    val averageRating by viewModel.averageRating.collectAsState(initial = null)
     
     var selectedTab by remember { mutableStateOf(0) }
     var showSwitchDialog by remember { mutableStateOf(false) }
+    var showRatingDialog by remember { mutableStateOf<Order?>(null) }
     var currentDestination by remember { mutableStateOf(LoaderDestination.ORDERS) }
     val tabs = listOf("Доступные", "Мои заказы")
     
@@ -57,11 +62,10 @@ fun LoaderScreen(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(
-                drawerContainerColor = Color.White,
+                drawerContainerColor = MaterialTheme.colorScheme.surface,
                 modifier = Modifier.width(240.dp),
                 drawerShape = RectangleShape
             ) {
-                // Кнопка закрытия (три полоски) + заголовок
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -77,11 +81,7 @@ fun LoaderScreen(
                     }
                     Spacer(modifier = Modifier.width(4.dp))
                     Column {
-                        Text(
-                            text = userName,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Text(text = userName, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                         Text(
                             text = "Грузчик",
                             fontSize = 13.sp,
@@ -90,19 +90,13 @@ fun LoaderScreen(
                     }
                 }
                 
-                Divider()
+                HorizontalDivider()
 
                 val primary = MaterialTheme.colorScheme.primary
 
                 @Composable
                 fun DrawerItem(label: String, selected: Boolean, onClick: () -> Unit) {
-                    val bgAlpha by animateFloatAsState(
-                        targetValue = if (selected) 1f else 0f,
-                        animationSpec = tween(200),
-                        label = "drawer_bg"
-                    )
-                    val textColor = if (selected) primary
-                    else MaterialTheme.colorScheme.onSurfaceVariant
+                    val textColor = if (selected) primary else MaterialTheme.colorScheme.onSurfaceVariant
 
                     Row(
                         modifier = Modifier
@@ -110,13 +104,8 @@ fun LoaderScreen(
                             .height(48.dp)
                             .background(
                                 if (selected) Brush.horizontalGradient(
-                                    colors = listOf(
-                                        primary.copy(alpha = 0.15f * bgAlpha),
-                                        Color.Transparent
-                                    )
-                                ) else Brush.horizontalGradient(
-                                    listOf(Color.Transparent, Color.Transparent)
-                                )
+                                    colors = listOf(primary.copy(alpha = 0.15f), Color.Transparent)
+                                ) else Brush.horizontalGradient(listOf(Color.Transparent, Color.Transparent))
                             ),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -167,7 +156,7 @@ fun LoaderScreen(
                     scope.launch { drawerState.close() }
                 }
 
-                Divider(modifier = Modifier.padding(vertical = 8.dp))
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
                 DrawerItem("Сменить роль", false) {
                     showSwitchDialog = true
@@ -180,16 +169,14 @@ fun LoaderScreen(
             targetState = currentDestination,
             transitionSpec = {
                 fadeIn(animationSpec = tween(220)) +
-                slideInHorizontally(
-                    animationSpec = tween(220),
-                    initialOffsetX = { it / 12 }
-                ) togetherWith fadeOut(animationSpec = tween(150))
+                slideInHorizontally(animationSpec = tween(220), initialOffsetX = { it / 12 }) togetherWith
+                fadeOut(animationSpec = tween(150))
             },
             label = "loader_nav"
         ) { destination ->
             when (destination) {
                 LoaderDestination.ORDERS -> {
-                    OrdersContent(
+                    LoaderOrdersContent(
                         availableOrders = availableOrders,
                         myOrders = myOrders,
                         isLoading = isLoading,
@@ -199,24 +186,35 @@ fun LoaderScreen(
                         onTabSelected = { selectedTab = it },
                         onMenuClick = { scope.launch { drawerState.open() } },
                         onTakeOrder = { viewModel.takeOrder(it) },
-                        onCompleteOrder = { viewModel.completeOrder(it) }
+                        onCompleteOrder = { order ->
+                            viewModel.completeOrder(order)
+                            showRatingDialog = order
+                        }
                     )
                 }
                 LoaderDestination.SETTINGS -> {
                     SettingsScreen(
-                        onBackClick = { currentDestination = LoaderDestination.ORDERS }
+                        onMenuClick = { scope.launch { drawerState.open() } },
+                        onBackClick = { currentDestination = LoaderDestination.ORDERS },
+                        onDarkThemeChanged = onDarkThemeChanged
                     )
                 }
                 LoaderDestination.RATING -> {
                     RatingScreen(
                         userName = userName,
-                        userRating = 5.0,
-                        onBackClick = { currentDestination = LoaderDestination.ORDERS }
+                        userRating = averageRating?.toDouble() ?: 5.0,
+                        onMenuClick = { scope.launch { drawerState.open() } },
+                        onBackClick = { currentDestination = LoaderDestination.ORDERS },
+                        completedCount = completedCount,
+                        totalEarnings = totalEarnings ?: 0.0,
+                        averageRating = averageRating ?: 0f,
+                        isDispatcher = false
                     )
                 }
                 LoaderDestination.HISTORY -> {
                     HistoryScreen(
                         orders = myOrders,
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         onBackClick = { currentDestination = LoaderDestination.ORDERS }
                     )
                 }
@@ -224,40 +222,109 @@ fun LoaderScreen(
         }
     }
     
-    // Диалог смены роли
+    // Диалог оценки после завершения заказа
+    showRatingDialog?.let { order ->
+        RateOrderDialog(
+            onDismiss = { showRatingDialog = null },
+            onRate = { rating ->
+                viewModel.rateOrder(order.id, rating)
+                showRatingDialog = null
+            }
+        )
+    }
+    
     if (showSwitchDialog) {
         AlertDialog(
             onDismissRequest = { showSwitchDialog = false },
             title = { Text("Сменить роль?") },
             text = { Text("Вы хотите выйти из режима грузчика?") },
             confirmButton = {
-                TextButton(
-                    onClick = {
-                        showSwitchDialog = false
-                        onSwitchRole()
-                    }
-                ) {
-                    Text("Да")
-                }
+                TextButton(onClick = {
+                    showSwitchDialog = false
+                    onSwitchRole()
+                }) { Text("Да") }
             },
             dismissButton = {
-                TextButton(onClick = { showSwitchDialog = false }) {
-                    Text("Отмена")
-                }
+                TextButton(onClick = { showSwitchDialog = false }) { Text("Отмена") }
             }
         )
     }
     
-    errorMessage?.let { error ->
-        LaunchedEffect(error) {
-            viewModel.clearError()
-        }
+    errorMessage?.let {
+        LaunchedEffect(it) { viewModel.clearError() }
     }
+}
+
+@Composable
+fun RateOrderDialog(
+    onDismiss: () -> Unit,
+    onRate: (Float) -> Unit
+) {
+    var selectedRating by remember { mutableStateOf(0) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Оцените заказ") },
+        text = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Как прошёл заказ?",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    for (i in 1..5) {
+                        IconButton(
+                            onClick = { selectedRating = i },
+                            modifier = Modifier.size(44.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Star,
+                                contentDescription = "$i звезд",
+                                tint = if (i <= selectedRating) Color(0xFFFFC107)
+                                else MaterialTheme.colorScheme.surfaceVariant,
+                                modifier = Modifier.size(36.dp)
+                            )
+                        }
+                    }
+                }
+                if (selectedRating > 0) {
+                    Text(
+                        text = when (selectedRating) {
+                            1 -> "Плохо"
+                            2 -> "Неплохо"
+                            3 -> "Хорошо"
+                            4 -> "Очень хорошо"
+                            5 -> "Отлично!"
+                            else -> ""
+                        },
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { if (selectedRating > 0) onRate(selectedRating.toFloat()) },
+                enabled = selectedRating > 0
+            ) {
+                Text("Отправить")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Пропустить") }
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OrdersContent(
+fun LoaderOrdersContent(
     availableOrders: List<Order>,
     myOrders: List<Order>,
     isLoading: Boolean,
@@ -285,10 +352,7 @@ fun OrdersContent(
                     },
                     navigationIcon = {
                         IconButton(onClick = onMenuClick) {
-                            Icon(
-                                imageVector = Icons.Default.Menu,
-                                contentDescription = "Меню"
-                            )
+                            Icon(imageVector = Icons.Default.Menu, contentDescription = "Меню")
                         }
                     }
                 )
@@ -310,20 +374,12 @@ fun OrdersContent(
                 .padding(padding)
         ) {
             when (selectedTab) {
-                0 -> AvailableOrdersList(
-                    orders = availableOrders,
-                    onTakeOrder = onTakeOrder
-                )
-                1 -> MyOrdersList(
-                    orders = myOrders,
-                    onCompleteOrder = onCompleteOrder
-                )
+                0 -> AvailableOrdersList(orders = availableOrders, onTakeOrder = onTakeOrder)
+                1 -> MyOrdersList(orders = myOrders, onCompleteOrder = onCompleteOrder)
             }
             
             if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
         }
     }
@@ -342,10 +398,23 @@ fun AvailableOrdersList(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            Icon(
+                imageVector = Icons.Default.WorkOff,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                modifier = Modifier.size(64.dp)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = "Нет доступных заказов",
                 fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = "Новые заказы появятся здесь",
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 8.dp)
             )
         }
     } else {
@@ -354,11 +423,8 @@ fun AvailableOrdersList(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(orders) { order ->
-                AvailableOrderCard(
-                    order = order,
-                    onTake = { onTakeOrder(order) }
-                )
+            items(orders, key = { it.id }) { order ->
+                AvailableOrderCard(order = order, onTake = { onTakeOrder(order) })
             }
         }
     }
@@ -377,10 +443,23 @@ fun MyOrdersList(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            Icon(
+                imageVector = Icons.Default.AssignmentTurnedIn,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                modifier = Modifier.size(64.dp)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = "У вас нет заказов",
                 fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = "Возьмите заказ на вкладке «Доступные»",
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 8.dp)
             )
         }
     } else {
@@ -389,11 +468,8 @@ fun MyOrdersList(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(orders) { order ->
-                MyOrderCard(
-                    order = order,
-                    onComplete = { onCompleteOrder(order) }
-                )
+            items(orders, key = { it.id }) { order ->
+                MyOrderCard(order = order, onComplete = { onCompleteOrder(order) })
             }
         }
     }
@@ -425,11 +501,7 @@ fun AvailableOrderCard(
                     .fillMaxWidth()
                     .padding(horizontal = 14.dp, vertical = 14.dp)
             ) {
-                Text(
-                    text = order.address,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Text(text = order.address, fontSize = 16.sp, fontWeight = FontWeight.Bold)
 
                 Spacer(modifier = Modifier.height(6.dp))
 
@@ -446,13 +518,33 @@ fun AvailableOrderCard(
                     modifier = Modifier.padding(top = 2.dp)
                 )
 
-                Text(
-                    text = "${order.pricePerHour.toInt()} ₽/час",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = accentColor,
-                    modifier = Modifier.padding(top = 6.dp)
-                )
+                if (order.comment.isNotBlank()) {
+                    Text(
+                        text = "💬 ${order.comment}",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.padding(top = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "${order.pricePerHour.toInt()} ₽/час",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = accentColor
+                    )
+                    if (order.estimatedHours > 1) {
+                        Text(
+                            text = " · ~${order.estimatedHours} ч · ${(order.pricePerHour * order.estimatedHours).toInt()} ₽",
+                            fontSize = 13.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
 
                 var pressed by remember { mutableStateOf(false) }
                 val scale by animateFloatAsState(
@@ -468,6 +560,8 @@ fun AvailableOrderCard(
                         .scale(scale),
                     shape = MaterialTheme.shapes.small
                 ) {
+                    Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
                     Text("Взять заказ", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
@@ -483,7 +577,7 @@ fun MyOrderCard(
     val dateFormat = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
     val accentColor = when (order.status) {
         OrderStatus.AVAILABLE -> MaterialTheme.colorScheme.primary
-        OrderStatus.TAKEN -> Color(0xFFE67E22)
+        OrderStatus.TAKEN, OrderStatus.IN_PROGRESS -> Color(0xFFE67E22)
         OrderStatus.COMPLETED -> MaterialTheme.colorScheme.secondary
         OrderStatus.CANCELLED -> MaterialTheme.colorScheme.error
     }
@@ -516,7 +610,7 @@ fun MyOrderCard(
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.weight(1f)
                     )
-                    StatusChip(status = order.status)
+                    LoaderStatusChip(status = order.status)
                 }
 
                 Spacer(modifier = Modifier.height(6.dp))
@@ -534,13 +628,46 @@ fun MyOrderCard(
                     modifier = Modifier.padding(top = 2.dp)
                 )
 
-                Text(
-                    text = "${order.pricePerHour.toInt()} ₽/час",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = accentColor,
-                    modifier = Modifier.padding(top = 6.dp)
-                )
+                Row(
+                    modifier = Modifier.padding(top = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "${order.pricePerHour.toInt()} ₽/час",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = accentColor
+                    )
+                    if (order.estimatedHours > 1) {
+                        Text(
+                            text = " · ~${(order.pricePerHour * order.estimatedHours).toInt()} ₽",
+                            fontSize = 13.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                // Показываем оценку если уже поставлена
+                order.workerRating?.let { rating ->
+                    Row(
+                        modifier = Modifier.padding(top = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        repeat(5) { i ->
+                            Icon(
+                                Icons.Default.Star,
+                                contentDescription = null,
+                                tint = if (i < rating.toInt()) Color(0xFFFFC107) else MaterialTheme.colorScheme.surfaceVariant,
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
+                        Text(
+                            text = " Ваша оценка",
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
 
                 if (order.status == OrderStatus.TAKEN) {
                     var pressed by remember { mutableStateOf(false) }
@@ -560,6 +687,8 @@ fun MyOrderCard(
                             containerColor = MaterialTheme.colorScheme.primary
                         )
                     ) {
+                        Icon(Icons.Default.Done, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text("Завершить", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                     }
                 }
@@ -569,10 +698,11 @@ fun MyOrderCard(
 }
 
 @Composable
-fun StatusChip(status: OrderStatus) {
+fun LoaderStatusChip(status: OrderStatus) {
     val (text, color) = when (status) {
         OrderStatus.AVAILABLE -> "Доступен" to MaterialTheme.colorScheme.primary
         OrderStatus.TAKEN -> "В работе" to Color(0xFFE67E22)
+        OrderStatus.IN_PROGRESS -> "В процессе" to Color(0xFFE67E22)
         OrderStatus.COMPLETED -> "Завершён" to MaterialTheme.colorScheme.secondary
         OrderStatus.CANCELLED -> "Отменён" to MaterialTheme.colorScheme.error
     }
@@ -589,3 +719,7 @@ fun StatusChip(status: OrderStatus) {
         )
     }
 }
+
+// Keep StatusChip alias for HistoryScreen compatibility
+@Composable
+fun StatusChip(status: OrderStatus) = LoaderStatusChip(status)

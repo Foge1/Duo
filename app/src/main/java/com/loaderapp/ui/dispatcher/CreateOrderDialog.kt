@@ -21,12 +21,13 @@ import java.util.*
 @Composable
 fun CreateOrderDialog(
     onDismiss: () -> Unit,
-    onCreate: (address: String, dateTime: Long, cargo: String, price: Double) -> Unit
+    onCreate: (address: String, dateTime: Long, cargo: String, price: Double, hours: Int, comment: String) -> Unit
 ) {
     var address by remember { mutableStateOf("") }
     var cargo by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
-    var minRating by remember { mutableStateOf("4.0") }
+    var estimatedHours by remember { mutableStateOf("1") }
+    var comment by remember { mutableStateOf("") }
     var showError by remember { mutableStateOf(false) }
     
     // Дата и время
@@ -39,12 +40,11 @@ fun CreateOrderDialog(
     var showTimePicker by remember { mutableStateOf(false) }
     
     val dateFormat = SimpleDateFormat("dd MMMM yyyy", Locale("ru"))
-    val timeFormat = SimpleDateFormat("HH:mm", Locale("ru"))
     
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Новый заказ") },
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
         text = {
             Column(
                 modifier = Modifier
@@ -102,30 +102,43 @@ fun CreateOrderDialog(
                         keyboardType = KeyboardType.Text
                     )
                 )
-                
-                // Минимальный рейтинг
-                OutlinedTextField(
-                    value = minRating,
-                    onValueChange = { minRating = it },
-                    label = { Text("Минимальный рейтинг грузчика") },
-                    placeholder = { Text("Например: 4.5") },
+
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-                )
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedTextField(
+                        value = price,
+                        onValueChange = { price = it },
+                        label = { Text("Цена ₽/час") },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                    )
+                    OutlinedTextField(
+                        value = estimatedHours,
+                        onValueChange = { estimatedHours = it },
+                        label = { Text("Часов") },
+                        modifier = Modifier.weight(0.6f),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+                }
                 
                 OutlinedTextField(
-                    value = price,
-                    onValueChange = { price = it },
-                    label = { Text("Цена за час (₽)") },
+                    value = comment,
+                    onValueChange = { comment = it },
+                    label = { Text("Комментарий (необязательно)") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                    maxLines = 2,
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Sentences
+                    )
                 )
                 
                 if (showError) {
                     Text(
-                        text = "Заполните все поля корректно",
+                        text = "Заполните все обязательные поля корректно",
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall
                     )
@@ -137,17 +150,18 @@ fun CreateOrderDialog(
                 onClick = {
                     if (address.isNotBlank() && cargo.isNotBlank() && price.isNotBlank()) {
                         try {
-                            val calendar = Calendar.getInstance()
-                            calendar.timeInMillis = selectedDate
-                            calendar.set(Calendar.HOUR_OF_DAY, selectedHour)
-                            calendar.set(Calendar.MINUTE, selectedMinute)
-                            calendar.set(Calendar.SECOND, 0)
+                            val cal = Calendar.getInstance()
+                            cal.timeInMillis = selectedDate
+                            cal.set(Calendar.HOUR_OF_DAY, selectedHour)
+                            cal.set(Calendar.MINUTE, selectedMinute)
+                            cal.set(Calendar.SECOND, 0)
                             
-                            val dateTime = calendar.timeInMillis
+                            val dateTime = cal.timeInMillis
                             val priceValue = price.toDoubleOrNull() ?: 0.0
+                            val hoursValue = estimatedHours.toIntOrNull() ?: 1
                             
-                            if (priceValue > 0) {
-                                onCreate(address, dateTime, cargo, priceValue)
+                            if (priceValue > 0 && hoursValue > 0) {
+                                onCreate(address, dateTime, cargo, priceValue, hoursValue, comment)
                             } else {
                                 showError = true
                             }
