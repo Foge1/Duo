@@ -7,7 +7,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.loaderapp.data.model.User
@@ -55,7 +59,11 @@ fun RoleSelectionScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 24.dp),
-                singleLine = true
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Words,
+                    keyboardType = KeyboardType.Text
+                )
             )
             
             Text(
@@ -67,26 +75,21 @@ fun RoleSelectionScreen(
                     .padding(bottom = 16.dp)
             )
             
-            OutlinedButton(
+            Button(
                 onClick = { selectedRole = UserRole.DISPATCHER },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
-                    .padding(bottom = 0.dp),
+                    .height(56.dp),
                 shape = MaterialTheme.shapes.small,
-                colors = ButtonDefaults.outlinedButtonColors(
+                colors = ButtonDefaults.buttonColors(
                     containerColor = if (selectedRole == UserRole.DISPATCHER)
-                        MaterialTheme.colorScheme.primaryContainer
-                    else
-                        MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.primary
-                ),
-                border = androidx.compose.foundation.BorderStroke(
-                    2.dp,
-                    if (selectedRole == UserRole.DISPATCHER)
                         MaterialTheme.colorScheme.primary
                     else
-                        MaterialTheme.colorScheme.outline
+                        MaterialTheme.colorScheme.outline.copy(alpha = 0.15f),
+                    contentColor = if (selectedRole == UserRole.DISPATCHER)
+                        Color.White
+                    else
+                        MaterialTheme.colorScheme.onSurface
                 )
             ) {
                 Text("Диспетчер", fontSize = 16.sp)
@@ -94,25 +97,21 @@ fun RoleSelectionScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            OutlinedButton(
+            Button(
                 onClick = { selectedRole = UserRole.LOADER },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = MaterialTheme.shapes.small,
-                colors = ButtonDefaults.outlinedButtonColors(
+                colors = ButtonDefaults.buttonColors(
                     containerColor = if (selectedRole == UserRole.LOADER)
-                        MaterialTheme.colorScheme.primaryContainer
-                    else
-                        MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.primary
-                ),
-                border = androidx.compose.foundation.BorderStroke(
-                    2.dp,
-                    if (selectedRole == UserRole.LOADER)
                         MaterialTheme.colorScheme.primary
                     else
-                        MaterialTheme.colorScheme.outline
+                        MaterialTheme.colorScheme.outline.copy(alpha = 0.15f),
+                    contentColor = if (selectedRole == UserRole.LOADER)
+                        Color.White
+                    else
+                        MaterialTheme.colorScheme.onSurface
                 )
             ) {
                 Text("Грузчик", fontSize = 16.sp)

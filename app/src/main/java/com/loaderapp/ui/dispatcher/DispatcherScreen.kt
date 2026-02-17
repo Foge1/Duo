@@ -95,7 +95,6 @@ fun DispatcherScreen(
 
                 // Пункты меню
                 NavigationDrawerItem(
-                    icon = { Icon(Icons.Default.List, contentDescription = null) },
                     label = { Text("Заказы") },
                     selected = currentDestination == DispatcherDestination.ORDERS,
                     onClick = {
@@ -108,7 +107,6 @@ fun DispatcherScreen(
                 )
                 
                 NavigationDrawerItem(
-                    icon = { Icon(Icons.Default.Star, contentDescription = null) },
                     label = { Text("Рейтинг") },
                     selected = currentDestination == DispatcherDestination.RATING,
                     onClick = {
@@ -121,7 +119,6 @@ fun DispatcherScreen(
                 )
                 
                 NavigationDrawerItem(
-                    icon = { Icon(Icons.Default.History, contentDescription = null) },
                     label = { Text("История") },
                     selected = currentDestination == DispatcherDestination.HISTORY,
                     onClick = {
@@ -134,7 +131,6 @@ fun DispatcherScreen(
                 )
                 
                 NavigationDrawerItem(
-                    icon = { Icon(Icons.Default.Settings, contentDescription = null) },
                     label = { Text("Настройки") },
                     selected = currentDestination == DispatcherDestination.SETTINGS,
                     onClick = {
@@ -149,7 +145,6 @@ fun DispatcherScreen(
                 Divider(modifier = Modifier.padding(vertical = 8.dp))
                 
                 NavigationDrawerItem(
-                    icon = { Icon(Icons.Default.ExitToApp, contentDescription = null) },
                     label = { Text("Сменить роль") },
                     selected = false,
                     onClick = {
