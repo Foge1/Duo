@@ -1,19 +1,25 @@
 package com.loaderapp.ui.loader
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import com.loaderapp.data.model.Order
 import com.loaderapp.data.model.OrderStatus
 import com.loaderapp.ui.history.HistoryScreen
@@ -86,112 +92,134 @@ fun LoaderScreen(
                 
                 Divider()
 
-                val drawerItemColors = NavigationDrawerItemDefaults.colors(
-                    selectedContainerColor = Color.White,
-                    unselectedContainerColor = Color.White,
-                    selectedIconColor = MaterialTheme.colorScheme.primary,
-                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    selectedTextColor = MaterialTheme.colorScheme.primary,
-                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                
-                // Пункты меню
-                NavigationDrawerItem(
-                    label = { Text("Заказы") },
-                    selected = currentDestination == LoaderDestination.ORDERS,
-                    onClick = {
-                        currentDestination = LoaderDestination.ORDERS
-                        scope.launch { drawerState.close() }
-                    },
-                    shape = RectangleShape,
-                    colors = drawerItemColors,
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                )
-                
-                NavigationDrawerItem(
-                    label = { Text("Рейтинг") },
-                    selected = currentDestination == LoaderDestination.RATING,
-                    onClick = {
-                        currentDestination = LoaderDestination.RATING
-                        scope.launch { drawerState.close() }
-                    },
-                    shape = RectangleShape,
-                    colors = drawerItemColors,
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                )
-                
-                NavigationDrawerItem(
-                    label = { Text("История") },
-                    selected = currentDestination == LoaderDestination.HISTORY,
-                    onClick = {
-                        currentDestination = LoaderDestination.HISTORY
-                        scope.launch { drawerState.close() }
-                    },
-                    shape = RectangleShape,
-                    colors = drawerItemColors,
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                )
-                
-                NavigationDrawerItem(
-                    label = { Text("Настройки") },
-                    selected = currentDestination == LoaderDestination.SETTINGS,
-                    onClick = {
-                        currentDestination = LoaderDestination.SETTINGS
-                        scope.launch { drawerState.close() }
-                    },
-                    shape = RectangleShape,
-                    colors = drawerItemColors,
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                )
-                
+                val primary = MaterialTheme.colorScheme.primary
+
+                @Composable
+                fun DrawerItem(label: String, selected: Boolean, onClick: () -> Unit) {
+                    val bgAlpha by animateFloatAsState(
+                        targetValue = if (selected) 1f else 0f,
+                        animationSpec = tween(200),
+                        label = "drawer_bg"
+                    )
+                    val textColor = if (selected) primary
+                    else MaterialTheme.colorScheme.onSurfaceVariant
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .background(
+                                if (selected) Brush.horizontalGradient(
+                                    colors = listOf(
+                                        primary.copy(alpha = 0.15f * bgAlpha),
+                                        Color.Transparent
+                                    )
+                                ) else Brush.horizontalGradient(
+                                    listOf(Color.Transparent, Color.Transparent)
+                                )
+                            ),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .width(4.dp)
+                                .fillMaxHeight()
+                                .background(primary.copy(alpha = if (selected) 1f else 0f))
+                        )
+                        Surface(
+                            modifier = Modifier.fillMaxSize(),
+                            color = Color.Transparent,
+                            onClick = onClick
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(start = 20.dp),
+                                contentAlignment = Alignment.CenterStart
+                            ) {
+                                Text(
+                                    text = label,
+                                    fontSize = 15.sp,
+                                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                                    color = textColor
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                DrawerItem("Заказы", currentDestination == LoaderDestination.ORDERS) {
+                    currentDestination = LoaderDestination.ORDERS
+                    scope.launch { drawerState.close() }
+                }
+                DrawerItem("Рейтинг", currentDestination == LoaderDestination.RATING) {
+                    currentDestination = LoaderDestination.RATING
+                    scope.launch { drawerState.close() }
+                }
+                DrawerItem("История", currentDestination == LoaderDestination.HISTORY) {
+                    currentDestination = LoaderDestination.HISTORY
+                    scope.launch { drawerState.close() }
+                }
+                DrawerItem("Настройки", currentDestination == LoaderDestination.SETTINGS) {
+                    currentDestination = LoaderDestination.SETTINGS
+                    scope.launch { drawerState.close() }
+                }
+
                 Divider(modifier = Modifier.padding(vertical = 8.dp))
-                
-                NavigationDrawerItem(
-                    label = { Text("Сменить роль") },
-                    selected = false,
-                    onClick = {
-                        showSwitchDialog = true
-                        scope.launch { drawerState.close() }
-                    },
-                    shape = RectangleShape,
-                    colors = drawerItemColors,
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                )
+
+                DrawerItem("Сменить роль", false) {
+                    showSwitchDialog = true
+                    scope.launch { drawerState.close() }
+                }
             }
         }
     ) {
-        when (currentDestination) {
-            LoaderDestination.ORDERS -> {
-                OrdersContent(
-                    availableOrders = availableOrders,
-                    myOrders = myOrders,
-                    isLoading = isLoading,
-                    userName = userName,
-                    selectedTab = selectedTab,
-                    tabs = tabs,
-                    onTabSelected = { selectedTab = it },
-                    onMenuClick = { scope.launch { drawerState.open() } },
-                    onTakeOrder = { viewModel.takeOrder(it) },
-                    onCompleteOrder = { viewModel.completeOrder(it) }
-                )
-            }
-            LoaderDestination.SETTINGS -> {
-                SettingsScreen(
-                    onBackClick = { currentDestination = LoaderDestination.ORDERS }
-                )
-            }
-            LoaderDestination.RATING -> {
-                RatingScreen(
-                    userName = userName,
-                    userRating = 5.0,
-                    onBackClick = { currentDestination = LoaderDestination.ORDERS }
-                )
-            }
-            LoaderDestination.HISTORY -> {
-                HistoryScreen(
-                    orders = myOrders,
-                    onBackClick = { currentDestination = LoaderDestination.ORDERS }
-                )
+        AnimatedContent(
+            targetState = currentDestination,
+            transitionSpec = {
+                fadeIn(animationSpec = tween(220)) +
+                slideInHorizontally(
+                    animationSpec = tween(220),
+                    initialOffsetX = { it / 12 }
+                ) togetherWith fadeOut(animationSpec = tween(150))
+            },
+            label = "loader_nav"
+        ) { destination ->
+            when (destination) {
+                LoaderDestination.ORDERS -> {
+                    OrdersContent(
+                        availableOrders = availableOrders,
+                        myOrders = myOrders,
+                        isLoading = isLoading,
+                        userName = userName,
+                        selectedTab = selectedTab,
+                        tabs = tabs,
+                        onTabSelected = { selectedTab = it },
+                        onMenuClick = { scope.launch { drawerState.open() } },
+                        onTakeOrder = { viewModel.takeOrder(it) },
+                        onCompleteOrder = { viewModel.completeOrder(it) }
+                    )
+                }
+                LoaderDestination.SETTINGS -> {
+                    SettingsScreen(
+                        onBackClick = { currentDestination = LoaderDestination.ORDERS }
+                    )
+                }
+                LoaderDestination.RATING -> {
+                    RatingScreen(
+                        userName = userName,
+                        userRating = 5.0,
+                        onBackClick = { currentDestination = LoaderDestination.ORDERS }
+                    )
+                }
+                LoaderDestination.HISTORY -> {
+                    HistoryScreen(
+                        orders = myOrders,
+                        onBackClick = { currentDestination = LoaderDestination.ORDERS }
+                    )
+                }
             }
         }
     }
@@ -377,63 +405,71 @@ fun AvailableOrderCard(
     onTake: () -> Unit
 ) {
     val dateFormat = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
-    
+    val accentColor = MaterialTheme.colorScheme.primary
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-        )
+        shape = MaterialTheme.shapes.small,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text(
-                text = order.address,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .fillMaxHeight()
+                    .background(accentColor)
             )
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            Text(
-                text = "Дата: ${dateFormat.format(Date(order.dateTime))}",
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            
-            Text(
-                text = "Груз: ${order.cargoDescription}",
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 4.dp)
-            )
-            
-            Text(
-                text = "Оплата: ${order.pricePerHour} ₽/час",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-            
-            OutlinedButton(
-                onClick = onTake,
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 12.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.primary
-                ),
-                border = androidx.compose.foundation.BorderStroke(
-                    2.dp,
-                    MaterialTheme.colorScheme.primary
-                )
+                    .padding(horizontal = 14.dp, vertical = 14.dp)
             ) {
-                Text("Взять заказ", fontSize = 16.sp)
+                Text(
+                    text = order.address,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Text(
+                    text = dateFormat.format(Date(order.dateTime)),
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Text(
+                    text = order.cargoDescription,
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+
+                Text(
+                    text = "${order.pricePerHour.toInt()} ₽/час",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = accentColor,
+                    modifier = Modifier.padding(top = 6.dp)
+                )
+
+                var pressed by remember { mutableStateOf(false) }
+                val scale by animateFloatAsState(
+                    targetValue = if (pressed) 0.96f else 1f,
+                    animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                    label = "take_scale"
+                )
+                Button(
+                    onClick = onTake,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp)
+                        .scale(scale),
+                    shape = MaterialTheme.shapes.small
+                ) {
+                    Text("Взять заказ", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                }
             }
         }
     }
@@ -445,65 +481,87 @@ fun MyOrderCard(
     onComplete: () -> Unit
 ) {
     val dateFormat = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
-    
+    val accentColor = when (order.status) {
+        OrderStatus.AVAILABLE -> MaterialTheme.colorScheme.primary
+        OrderStatus.TAKEN -> Color(0xFFE67E22)
+        OrderStatus.COMPLETED -> MaterialTheme.colorScheme.secondary
+        OrderStatus.CANCELLED -> MaterialTheme.colorScheme.error
+    }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = MaterialTheme.shapes.small
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .fillMaxHeight()
+                    .background(accentColor)
+            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp, vertical = 14.dp)
             ) {
-                Text(
-                    text = order.address,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                
-                StatusChip(status = order.status)
-            }
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            Text(
-                text = "Дата: ${dateFormat.format(Date(order.dateTime))}",
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            
-            Text(
-                text = "Груз: ${order.cargoDescription}",
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 4.dp)
-            )
-            
-            Text(
-                text = "Оплата: ${order.pricePerHour} ₽/час",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-            
-            if (order.status == OrderStatus.TAKEN) {
-                Button(
-                    onClick = onComplete,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondary
-                    )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Завершить", fontSize = 16.sp)
+                    Text(
+                        text = order.address,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f)
+                    )
+                    StatusChip(status = order.status)
+                }
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Text(
+                    text = dateFormat.format(Date(order.dateTime)),
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Text(
+                    text = order.cargoDescription,
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+
+                Text(
+                    text = "${order.pricePerHour.toInt()} ₽/час",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = accentColor,
+                    modifier = Modifier.padding(top = 6.dp)
+                )
+
+                if (order.status == OrderStatus.TAKEN) {
+                    var pressed by remember { mutableStateOf(false) }
+                    val scale by animateFloatAsState(
+                        targetValue = if (pressed) 0.96f else 1f,
+                        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                        label = "complete_scale"
+                    )
+                    Button(
+                        onClick = onComplete,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 12.dp)
+                            .scale(scale),
+                        shape = MaterialTheme.shapes.small,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Text("Завершить", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                    }
                 }
             }
         }
@@ -514,19 +572,19 @@ fun MyOrderCard(
 fun StatusChip(status: OrderStatus) {
     val (text, color) = when (status) {
         OrderStatus.AVAILABLE -> "Доступен" to MaterialTheme.colorScheme.primary
-        OrderStatus.TAKEN -> "В работе" to MaterialTheme.colorScheme.tertiary
-        OrderStatus.COMPLETED -> "Завершен" to MaterialTheme.colorScheme.secondary
-        OrderStatus.CANCELLED -> "Отменен" to MaterialTheme.colorScheme.error
+        OrderStatus.TAKEN -> "В работе" to Color(0xFFE67E22)
+        OrderStatus.COMPLETED -> "Завершён" to MaterialTheme.colorScheme.secondary
+        OrderStatus.CANCELLED -> "Отменён" to MaterialTheme.colorScheme.error
     }
-    
     Surface(
-        color = color.copy(alpha = 0.2f),
-        shape = MaterialTheme.shapes.small
+        color = color.copy(alpha = 0.12f),
+        shape = RoundedCornerShape(4.dp)
     ) {
         Text(
             text = text,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-            fontSize = 12.sp,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+            fontSize = 11.sp,
+            fontWeight = FontWeight.SemiBold,
             color = color
         )
     }
