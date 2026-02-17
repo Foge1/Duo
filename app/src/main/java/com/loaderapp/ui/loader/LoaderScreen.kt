@@ -50,30 +50,50 @@ fun LoaderScreen(
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet(drawerContainerColor = androidx.compose.ui.graphics.Color.White, 
-                modifier = Modifier.width(240.dp)
+            ModalDrawerSheet(
+                drawerContainerColor = Color.White,
+                modifier = Modifier.width(240.dp),
+                drawerShape = RectangleShape
             ) {
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                // Заголовок панели
-                Column(
+                // Кнопка закрытия (три полоски) + заголовок
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp)
+                        .padding(start = 8.dp, top = 16.dp, end = 16.dp, bottom = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = userName,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Грузчик",
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    IconButton(onClick = { scope.launch { drawerState.close() } }) {
+                        Icon(
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = "Закрыть меню",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Column {
+                        Text(
+                            text = userName,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Грузчик",
+                            fontSize = 13.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
                 
                 Divider()
+
+                val drawerItemColors = NavigationDrawerItemDefaults.colors(
+                    selectedContainerColor = Color.White,
+                    unselectedContainerColor = Color.White,
+                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 
                 // Пункты меню
                 NavigationDrawerItem(
@@ -84,12 +104,8 @@ fun LoaderScreen(
                         currentDestination = LoaderDestination.ORDERS
                         scope.launch { drawerState.close() }
                     },
-                    shape = androidx.compose.ui.graphics.RectangleShape,
-                    colors = NavigationDrawerItemDefaults.colors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary
-                    ),
+                    shape = RectangleShape,
+                    colors = drawerItemColors,
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
                 
@@ -101,12 +117,8 @@ fun LoaderScreen(
                         currentDestination = LoaderDestination.RATING
                         scope.launch { drawerState.close() }
                     },
-                    shape = androidx.compose.ui.graphics.RectangleShape,
-                    colors = NavigationDrawerItemDefaults.colors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary
-                    ),
+                    shape = RectangleShape,
+                    colors = drawerItemColors,
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
                 
@@ -118,12 +130,8 @@ fun LoaderScreen(
                         currentDestination = LoaderDestination.HISTORY
                         scope.launch { drawerState.close() }
                     },
-                    shape = androidx.compose.ui.graphics.RectangleShape,
-                    colors = NavigationDrawerItemDefaults.colors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary
-                    ),
+                    shape = RectangleShape,
+                    colors = drawerItemColors,
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
                 
@@ -135,12 +143,8 @@ fun LoaderScreen(
                         currentDestination = LoaderDestination.SETTINGS
                         scope.launch { drawerState.close() }
                     },
-                    shape = androidx.compose.ui.graphics.RectangleShape,
-                    colors = NavigationDrawerItemDefaults.colors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary
-                    ),
+                    shape = RectangleShape,
+                    colors = drawerItemColors,
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
                 
@@ -154,12 +158,8 @@ fun LoaderScreen(
                         showSwitchDialog = true
                         scope.launch { drawerState.close() }
                     },
-                    shape = androidx.compose.ui.graphics.RectangleShape,
-                    colors = NavigationDrawerItemDefaults.colors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary
-                    ),
+                    shape = RectangleShape,
+                    colors = drawerItemColors,
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
             }

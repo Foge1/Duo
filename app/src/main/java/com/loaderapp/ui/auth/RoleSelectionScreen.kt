@@ -67,74 +67,58 @@ fun RoleSelectionScreen(
                     .padding(bottom = 16.dp)
             )
             
-            Row(
+            OutlinedButton(
+                onClick = { selectedRole = UserRole.DISPATCHER },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    .height(56.dp)
+                    .padding(bottom = 0.dp),
+                shape = MaterialTheme.shapes.small,
+                colors = ButtonDefaults.outlinedButtonColors(
+                    containerColor = if (selectedRole == UserRole.DISPATCHER)
+                        MaterialTheme.colorScheme.primaryContainer
+                    else
+                        MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.primary
+                ),
+                border = androidx.compose.foundation.BorderStroke(
+                    2.dp,
+                    if (selectedRole == UserRole.DISPATCHER)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.outline
+                )
             ) {
-                OutlinedButton(
-                    onClick = { selectedRole = UserRole.DISPATCHER },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(80.dp),
-                    shape = MaterialTheme.shapes.small,
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = if (selectedRole == UserRole.DISPATCHER) 
-                            MaterialTheme.colorScheme.primaryContainer 
-                        else 
-                            MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.primary
-                    ),
-                    border = androidx.compose.foundation.BorderStroke(
-                        2.dp,
-                        if (selectedRole == UserRole.DISPATCHER) 
-                            MaterialTheme.colorScheme.primary 
-                        else 
-                            MaterialTheme.colorScheme.outline
-                    )
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text("🎯", fontSize = 28.sp)
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text("Диспетчер", fontSize = 13.sp)
-                    }
-                }
-                
-                OutlinedButton(
-                    onClick = { selectedRole = UserRole.LOADER },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(80.dp),
-                    shape = MaterialTheme.shapes.small,
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = if (selectedRole == UserRole.LOADER) 
-                            MaterialTheme.colorScheme.primaryContainer 
-                        else 
-                            MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.primary
-                    ),
-                    border = androidx.compose.foundation.BorderStroke(
-                        2.dp,
-                        if (selectedRole == UserRole.LOADER) 
-                            MaterialTheme.colorScheme.primary 
-                        else 
-                            MaterialTheme.colorScheme.outline
-                    )
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text("📦", fontSize = 28.sp)
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text("Грузчик", fontSize = 13.sp)
-                    }
-                }
+                Text("Диспетчер", fontSize = 16.sp)
             }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            OutlinedButton(
+                onClick = { selectedRole = UserRole.LOADER },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = MaterialTheme.shapes.small,
+                colors = ButtonDefaults.outlinedButtonColors(
+                    containerColor = if (selectedRole == UserRole.LOADER)
+                        MaterialTheme.colorScheme.primaryContainer
+                    else
+                        MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.primary
+                ),
+                border = androidx.compose.foundation.BorderStroke(
+                    2.dp,
+                    if (selectedRole == UserRole.LOADER)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.outline
+                )
+            ) {
+                Text("Грузчик", fontSize = 16.sp)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
             
             if (showError) {
                 Text(
